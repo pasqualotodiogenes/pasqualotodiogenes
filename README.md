@@ -1,61 +1,124 @@
 ```ruby
+module TextFormatter
+  def format_key(key)
+    key.to_s.gsub('_', ' ').split.map(&:capitalize).join(' ')
+  end
+end
+
+# A classe Skills é totalmente dinâmica. Ela renderiza qualquer estrutura de dados que receber, sem conhecer as categorias de antemão.
+
+class Skills
+  include TextFormatter
+
+  def initialize(skills_data)
+    @data = skills_data || {}
+  end
+
+  def to_s
+    output = ["### Habilidades Técnicas\n"]
+
+    # Itera sobre cada categoria principal de habilidade (ex: :front_end)
+    @data.each do |category, sub_skills|
+      category_name = format_key(category)
+      output << "**#{category_name}:**"
+
+      # Se a categoria tiver subcategorias (como :linguagens, :frameworks)
+      if sub_skills.is_a?(Hash)
+        sub_skills.each do |sub_category, items|
+          sub_category_name = format_key(sub_category)
+          output << "- **#{sub_category_name}:** #{items.join(', ')}"
+        end
+      # Se for apenas uma lista simples de itens
+      elsif sub_skills.is_a?(Array)
+        output << "- #{sub_skills.join(', ')}"
+      end
+      output << "" # Adiciona uma linha em branco para espaçamento
+    end
+
+    output.join("\n").strip
+  end
+end
+
+
+
 class Desenvolvedor
-  attr_accessor :nome, :area, :trabalho, :local
+  include TextFormatter
+  attr_reader :data, :skills
 
-  def initialize(nome, area, trabalho, local)
-    @nome = nome
-    @area = area
-    @trabalho = trabalho
-    @local = local
-  end
-end
-
-class SobreMim < Desenvolvedor
-  def initialize
-    super('Diógenes da Silva Pasqualoto', 'TI', 'for now looking...', 'RS')
+  def initialize(data)
+    @data = data
+    @skills = Skills.new(data[:skills] || {})
   end
 
   def to_s
-    "Nome: #{@nome}\nÁrea: #{@area}\nTrabalho: #{@trabalho}\nLocal: #{@local}"
+    profile_parts = []
+    profile_parts << "# #{data[:nome]}"
+    profile_parts << "\n*#{data[:area]}* | *#{data[:trabalho]}* | *#{data[:local]}*\n"
+
+    if data[:sobre]
+      profile_parts << "### Sobre Mim"
+      profile_parts << data[:sobre]
+      profile_parts << ""
+    end
+
+    profile_parts << "---"
+    profile_parts << skills.to_s
+    profile_parts << "---"
+
+    if data[:contato]
+      profile_parts << "\n### Contato\n"
+      contact_links = data[:contato].map do |plataforma, url|
+        "[#{format_key(plataforma)}](#{url})"
+      end
+      profile_parts << contact_links.join(' | ')
+    end
+
+    profile_parts.join("\n")
   end
 end
 
-class Skills < Desenvolvedor
-  def initialize
-    super('Diógenes da Silva Pasqualoto', 'TI', 'for now looking...', 'RS')
+# --- Lógica Principal do Script ---
 
-    @front_end = {
-      linguagens: ['HTML', 'CSS', 'JavaScript'],
-      frameworks: ['Vue.js'],
-      bibliotecas: ['jQuery', 'Bootstrap'],
-      ferramentas: ['Webpack', 'Gulp']
-    }
+DADOS_DO_PERFIL = {
+  nome: "Diógenes da Silva Pasqualoto",
+  area: "Desenvolvimento de Software",
+  trabalho: "Buscando novas oportunidades",
+  local: "Rio Grande do Sul, Brasil",
+  sobre: "Desenvolvedor apaixonado por criar soluções eficientes e elegantes, com foco em Ruby e JavaScript. Sempre buscando aprender novas tecnologias e aprimorar minhas habilidades.",
+  contato: {
+    linkedin: "https://www.linkedin.com/in/seu-usuario/",
+    github: "https://github.com/pasqualotodiogenes",
+    email: "mailto:seuemail@example.com"
+  },
+  skills: {
+    front_end: {
+      linguagens: ["HTML", "CSS", "JavaScript", "TypeScript"],
+      frameworks: ["Vue.js", "React"],
+      bibliotecas: ["jQuery", "Bootstrap", "TailwindCSS"],
+      ferramentas: ["Webpack", "Gulp", "Vite"]
+    },
+    back_end: {
+      linguagens: ["JavaScript", "Ruby"],
+      frameworks: ["Node.js", "Express", "Rails"],
+      bancos_de_dados: ["SQLITE", "MySQL", "MongoDB", "PostgreSQL", "Redis"]
+    },
+    dev_ops: {
+      ferramentas: ["Docker", "Git", "Linux"]
+    },
+    metodologias: ["Scrum", "Kanban", "TDD"]
+  }
+}
 
-    @back_end = {
-      linguagens: ['JavaScript', 'Ruby'],
-      frameworks: ['Node.js', 'Express', "Rails"],
-      bancos_de_dados: ['SQLITE', 'MySQL', 'MongoDB', 'PostgreSQL']
-    }
+# --- Execução ---
 
-    @outras_habilidades = ['Git', 'Linux']
-
-    @metodologias = ['Scrum', 'Kanban']
-  end
-
-  def to_s
-    skills = "Front-End:\n  Linguagens: #{@front_end[:linguagens]}\n  Frameworks: #{@front_end[:frameworks]}\n  Bibliotecas: #{@front_end[:bibliotecas]}\n  Ferramentas: #{@front_end[:ferramentas]}"
-    skills += "\nBack-End:\n  Linguagens: #{@back_end[:linguagens]}\n  Frameworks: #{@back_end[:frameworks]}\n  Bancos de Dados: #{@back_end[:bancos_de_dados]}"
-    skills += "\nOutras Habilidades:\n  #{@outras_habilidades}"
-    skills += "\nMetodologias:\n  #{@metodologias}"
-
-    super + "\n#{skills}"
-  end
+desenvolvedor = Desenvolvedor.new(DADOS_DO_PERFIL)
+output = desenvolvedor.to_s
+if ARGV.first == '--write'
+  File.write('README.md', output)
+  puts "✅ Perfil salvo com sucesso em 'README.md'!"
+else
+  # Se nenhum argumento for passado, apenas imprime no console.
+  puts output
 end
-
-sobre_mim = SobreMim.new
-puts sobre_mim
-
-skills = Skills.new
-puts skills
 
 ```
