@@ -1,124 +1,123 @@
 ```ruby
+
 module TextFormatter
-  def format_key(key)
-    key.to_s.gsub('_', ' ').split.map(&:capitalize).join(' ')
-  end
+  def format_key(key)
+    key.to_s.gsub('_', ' ').split.map(&:capitalize).join(' ')
+  end
 end
 
-# A classe Skills é totalmente dinâmica. Ela renderiza qualquer estrutura de dados que receber, sem conhecer as categorias de antemão.
+# The Skills class is entirely dynamic. It renders any data structure it receives without needing to know the categories beforehand.
 
 class Skills
-  include TextFormatter
+  include TextFormatter
 
-  def initialize(skills_data)
-    @data = skills_data || {}
-  end
+  def initialize(skills_data)
+    @data = skills_data || {}
+  end
 
-  def to_s
-    output = ["### Habilidades Técnicas\n"]
+  def to_s
+    output = ["### Technical Skills\n"]
 
-    # Itera sobre cada categoria principal de habilidade (ex: :front_end)
-    @data.each do |category, sub_skills|
-      category_name = format_key(category)
-      output << "**#{category_name}:**"
+    # Iterates over each main skill category 
+    @data.each do |category, sub_skills|
+      category_name = format_key(category)
+      output << "**#{category_name}:**"
 
-      # Se a categoria tiver subcategorias (como :linguagens, :frameworks)
-      if sub_skills.is_a?(Hash)
-        sub_skills.each do |sub_category, items|
-          sub_category_name = format_key(sub_category)
-          output << "- **#{sub_category_name}:** #{items.join(', ')}"
-        end
-      # Se for apenas uma lista simples de itens
-      elsif sub_skills.is_a?(Array)
-        output << "- #{sub_skills.join(', ')}"
-      end
-      output << "" # Adiciona uma linha em branco para espaçamento
-    end
+      # If the category has subcategories 
+      if sub_skills.is_a?(Hash)
+        sub_skills.each do |sub_category, items|
+          sub_category_name = format_key(sub_category)
+          output << "- **#{sub_category_name}:** #{items.join(', ')}"
+        end
+      # If it's just a simple list of items
+      elsif sub_skills.is_a?(Array)
+        output << "- #{sub_skills.join(', ')}"
+      end
+      output << "" # Adds a blank line for spacing
+    end
 
-    output.join("\n").strip
-  end
+    output.join("\n").strip
+  end
 end
 
+class DeveloperProfile
+  include TextFormatter
+  attr_reader :data, :skills
 
+  def initialize(data)
+    @data = data
+    @skills = Skills.new(data[:skills] || {})
+  end
 
-class Desenvolvedor
-  include TextFormatter
-  attr_reader :data, :skills
+  def to_s
+    profile_parts = []
+    profile_parts << "# #{data[:name]}"
+    profile_parts << "\n*#{data[:area]}* | *#{data[:job]}* | *#{data[:location]}*\n"
 
-  def initialize(data)
-    @data = data
-    @skills = Skills.new(data[:skills] || {})
-  end
+    if data[:about]
+      profile_parts << "### About Me"
+      profile_parts << data[:about]
+      profile_parts << ""
+    end
 
-  def to_s
-    profile_parts = []
-    profile_parts << "# #{data[:nome]}"
-    profile_parts << "\n*#{data[:area]}* | *#{data[:trabalho]}* | *#{data[:local]}*\n"
+    profile_parts << "---"
+    profile_parts << skills.to_s
+    profile_parts << "---"
 
-    if data[:sobre]
-      profile_parts << "### Sobre Mim"
-      profile_parts << data[:sobre]
-      profile_parts << ""
-    end
+    if data[:contact]
+      profile_parts << "\n### Contact\n"
+      contact_links = data[:contact].map do |platform, url|
+        "[#{format_key(platform)}](#{url})"
+      end
+      profile_parts << contact_links.join(' | ')
+    end
 
-    profile_parts << "---"
-    profile_parts << skills.to_s
-    profile_parts << "---"
-
-    if data[:contato]
-      profile_parts << "\n### Contato\n"
-      contact_links = data[:contato].map do |plataforma, url|
-        "[#{format_key(plataforma)}](#{url})"
-      end
-      profile_parts << contact_links.join(' | ')
-    end
-
-    profile_parts.join("\n")
-  end
+    profile_parts.join("\n")
+  end
 end
 
-# --- Lógica Principal do Script ---
+# --- Main Script Logic ---
 
-DADOS_DO_PERFIL = {
-  nome: "Diógenes da Silva Pasqualoto",
-  area: "Desenvolvimento de Software",
-  trabalho: "Buscando novas oportunidades",
-  local: "Rio Grande do Sul, Brasil",
-  sobre: "Desenvolvedor apaixonado por criar soluções eficientes e elegantes, com foco em Ruby e JavaScript. Sempre buscando aprender novas tecnologias e aprimorar minhas habilidades.",
-  contato: {
-    linkedin: "https://www.linkedin.com/in/seu-usuario/",
-    github: "https://github.com/pasqualotodiogenes",
-    email: "mailto:seuemail@example.com"
-  },
-  skills: {
-    front_end: {
-      linguagens: ["HTML", "CSS", "JavaScript", "TypeScript"],
-      frameworks: ["Vue.js", "React"],
-      bibliotecas: ["jQuery", "Bootstrap", "TailwindCSS"],
-      ferramentas: ["Webpack", "Gulp", "Vite"]
-    },
-    back_end: {
-      linguagens: ["JavaScript", "Ruby"],
-      frameworks: ["Node.js", "Express", "Rails"],
-      bancos_de_dados: ["SQLITE", "MySQL", "MongoDB", "PostgreSQL", "Redis"]
-    },
-    dev_ops: {
-      ferramentas: ["Docker", "Git", "Linux"]
-    },
-    metodologias: ["Scrum", "Kanban", "TDD"]
-  }
+PROFILE_DATA = {
+  name: "Diógenes da Silva Pasqualoto",
+  area: "Software Development",
+  job: "Seeking new opportunities",
+  location: "Rio Grande do Sul, Brazil",
+  about: "A developer with a focus on solid engineering fundamentals, experienced in Ruby and JavaScript. I'm familiar with technologies like Vue.js and React and have the ability to learn and adapt to new tools as needed.",
+  contact: {
+    linkedin: "https://www.linkedin.com/in/seu-usuario/",
+    github: "https://github.com/pasqualotodiogenes",
+    email: "mailto:seuemail@example.com"
+  },
+  skills: {
+    front_end: {
+      fundamentals: ["HTML", "CSS", "JavaScript (ES6+)"],
+      frameworks: ["Vue.js", "React"],
+      libraries: ["jQuery", "Bootstrap", "TailwindCSS"],
+      tools: ["Webpack", "Gulp", "Vite"]
+    },
+    back_end: {
+      languages: ["JavaScript", "Ruby"],
+      frameworks: ["Node.js", "Express", "Rails"],
+      databases: ["SQLITE", "MySQL", "MongoDB", "PostgreSQL", "Redis"]
+    },
+    dev_ops: {
+      tools: ["Docker", "Git", "Linux"]
+    },
+    methodologies: ["Scrum", "Kanban", "TDD"]
+  }
 }
 
-# --- Execução ---
+# --- Execution ---
 
-desenvolvedor = Desenvolvedor.new(DADOS_DO_PERFIL)
-output = desenvolvedor.to_s
+developer = DeveloperProfile.new(PROFILE_DATA)
+output = developer.to_s
 if ARGV.first == '--write'
-  File.write('README.md', output)
-  puts "✅ Perfil salvo com sucesso em 'README.md'!"
+  File.write('README.md', output)
+  puts "✅ Profile saved successfully to 'README.md'!"
 else
-  # Se nenhum argumento for passado, apenas imprime no console.
-  puts output
+  # If no arguments are passed, just print to the console.
+  puts output
 end
 
 ```
