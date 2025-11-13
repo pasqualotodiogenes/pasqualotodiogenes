@@ -85,9 +85,9 @@ PROFILE_DATA = {
   location: "Rio Grande do Sul, Brazil",
   about: "A developer with a focus on solid engineering fundamentals, experienced in Ruby and JavaScript. I'm familiar with technologies like Vue.js and React and have the ability to learn and adapt to new tools as needed.",
   contact: {
-    linkedin: "https://www.linkedin.com/in/seu-usuario/",
+    linkedin: "https://www.linkedin.com/in/diogenes-pasqualoto-203750331/",
     github: "https://github.com/pasqualotodiogenes",
-    email: "mailto:seuemail@example.com"
+    email: "mailto:diogenespasqualoto147@gmail.com"
   },
   skills: {
     front_end: {
